@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Responsive Wave Animation Background</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
+    canvas {
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+    }
+    .content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      z-index: 1;
+      padding: 20px;
+    }
+    .content h1 {
+      font-size: 4vw;
+      margin: 0;
+    }
+    .content p {
+      font-size: 1.5vw;
+      margin: 10px 0 0;
+    }
+    @media (max-width: 768px) {
+      .content h1 {
+        font-size: 6vw;
+      }
+      .content p {
+        font-size: 3vw;
+      }
+    }
+    @media (max-width: 480px) {
+      .content h1 {
+        font-size: 8vw;
+      }
+      .content p {
+        font-size: 4vw;
+      }
+    }
+  </style>
+</head>
+<body>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+  <script>
+    // Initialize Three.js scene
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    // Create a grid of cubes
+    const gridSize = 20;
+    const cubeSize = 0.5;
+    const cubes = [];
+
+    const createCubes = () => {
+      for (let x = -gridSize; x <= gridSize; x++) {
+        for (let y = -gridSize; y <= gridSize; y++) {
+          const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+          const material = new THREE.MeshStandardMaterial({ color: 0x44aa88 });
+          const cube = new THREE.Mesh(geometry, material);
+          cube.position.set(x, y, 0);
+          scene.add(cube);
+          cubes.push(cube);
+        }
+      }
+    };
+    createCubes();
+
+    // Lighting
+    const ambientLight = new THREE.AmbientLight(0x404040);
+    scene.add(ambientLight);
+
+    const pointLight = new THREE.PointLight(0xffffff, 1, 100);
+    pointLight.position.set(10, 10, 10);
+    scene.add(pointLight);
+
+    camera.position.z = 50;
+
+    // Animate the cubes in a wave pattern
+    const animateCubes = () => {
+      cubes.forEach((cube, index) => {
+        gsap.to(cube.position, {
+          duration: 1,
+          z: Math.sin((cube.position.x + cube.position.y) * 0.5) * 2,
+          repeat: -1,
+          yoyo: true,
+          ease: "sine.inOut",
+          delay: Math.random() * 2
+        });
+      });
+    };
+
+    const animate = () => {
+      requestAnimationFrame(animate);
+      renderer.render(scene, camera);
+    };
+
+    animate();
+    animateCubes();
+
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+  </script>
+</body>
+</html>
